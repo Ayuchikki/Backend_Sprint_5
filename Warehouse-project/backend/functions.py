@@ -1,7 +1,14 @@
 from database import engine, packages, dispatches
 from sqlalchemy import select, insert, update, delete
-from datetime import date
+from datetime import datetime, date, timedelta
+import jwt 
 
+USERNAME = "Ayushman"
+PASSWORD = "12345"
+ACCESS_TOKEN_EXP = 1
+REFRESH_TOKEN_EXPIRY = 7 * 24 * 60
+SECRET_KEY = "SECRET123" 
+ALGORITHM = "HS256"
 
 def add_package(data):
     with engine.begin() as conn:
@@ -103,3 +110,32 @@ def get_dispatches():
         result = conn.execute(select(dispatches))
 
         return [dict(row._mapping) for row in result]
+
+def verify_login(username, password):
+    if username == USERNAME and password == PASSWORD:
+        access_token = create_token(username=username, token_type = "access")
+        refresh_token = create_token(username=username, token_type = "refresh")
+        return {"access_token": access_token, "refresh_token": refresh_token}
+    return False 
+
+def create_token(username, token_type):
+    time = ACCESS_TOKEN_EXP
+    if token_type == "refresh":
+        time = REFRESH_TOKEN_EXPIRY
+    payload ={
+        "username":username,
+        "token_type": token_type,
+        "exp": datetime.now() + timedelta(minutes=time)
+    }
+    token = jwt.encode(payload = payload, key = SECRET_KEY, algorithm = ALGORITHM)
+    return token
+
+def verify_token (token, token_type):
+    try:
+        payload = jwt.decode(jwt= token, key= SECRET_KEY, algorithms= [ALGORITHM])
+    except:
+        return False 
+
+    if payload ["token_type"]== token_type:
+        return payload ["username"]
+    

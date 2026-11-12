@@ -44,8 +44,6 @@ def get_package(package_id):
             return dict(row._mapping)
 
         return None
-
-
 def update_package(package_id, data):
     with engine.begin() as conn:
         result = conn.execute(
@@ -55,8 +53,6 @@ def update_package(package_id, data):
         )
 
         return result.rowcount
-
-
 def delete_package(package_id):
     with engine.begin() as conn:
         result = conn.execute(
@@ -64,8 +60,6 @@ def delete_package(package_id):
         )
 
         return result.rowcount
-
-
 def search_packages(name):
     with engine.connect() as conn:
         result = conn.execute(
@@ -79,7 +73,6 @@ def search_packages(name):
 
 def add_dispatch(data):
     with engine.begin() as conn:
-
         result = conn.execute(
             insert(dispatches).values(
                 destination=data["destination"],
@@ -90,9 +83,7 @@ def add_dispatch(data):
         )
 
         dispatch_id = result.inserted_primary_key[0]
-
         for package_id in data["package_ids"]:
-
             conn.execute(
                 update(packages)
                 .where(packages.c.id == package_id)
@@ -101,7 +92,6 @@ def add_dispatch(data):
                     dispatch_id=dispatch_id
                 )
             )
-
         return dispatch_id
 
 

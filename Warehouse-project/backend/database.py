@@ -1,11 +1,19 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
-from sqlalchemy.orm import Session
 
 DATABASE_URL = "sqlite:///warehouse.db"
 
 engine = create_engine(DATABASE_URL)
 
 metadata = MetaData()
+
+users = Table(
+    "users",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("username", String, unique=True),
+    Column("password", String),
+    Column("role", String)
+)
 
 packages = Table(
     "packages",

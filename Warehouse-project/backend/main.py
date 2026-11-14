@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-
 import functions
 
 app = FastAPI()
@@ -16,7 +15,7 @@ app.add_middleware(
 
 @app.get("/")
 def home(token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -26,7 +25,7 @@ def home(token=Header(None)):
 
 @app.post("/packages")
 def create_package(data: dict, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -38,7 +37,7 @@ def create_package(data: dict, token=Header(None)):
 
 @app.get("/packages")
 def all_packages(token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -48,7 +47,7 @@ def all_packages(token=Header(None)):
 
 @app.get("/packages/{package_id}")
 def package_details(package_id: int, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -63,7 +62,7 @@ def package_details(package_id: int, token=Header(None)):
 
 @app.patch("/packages/{package_id}")
 def edit_package(package_id: int, data: dict, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -78,7 +77,7 @@ def edit_package(package_id: int, data: dict, token=Header(None)):
 
 @app.delete("/packages/{package_id}")
 def remove_package(package_id: int, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -93,7 +92,7 @@ def remove_package(package_id: int, token=Header(None)):
 
 @app.get("/search/{name}")
 def search_package(name: str, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -103,7 +102,7 @@ def search_package(name: str, token=Header(None)):
 
 @app.post("/dispatches")
 def create_dispatch(data: dict, token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -115,7 +114,7 @@ def create_dispatch(data: dict, token=Header(None)):
 
 @app.get("/dispatches")
 def all_dispatches(token=Header(None)):
-    username = functions.verify_token(token=token)
+    username = functions.verify_token(token=token, token_type="access")
 
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or Expired token")
@@ -127,21 +126,28 @@ def all_dispatches(token=Header(None)):
 def login(username: str, password: str):
     token = functions.verify_login(username=username, password=password)
 
-    if token is None:
+    if not token:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
 
-    return {token}
+    return token
 
-from fastapi import Header, HTTPException
 
 @app.post("/refresh")
 def refresh(refresh_token: str = Header(None)):
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
-    
-    username = functions.verify_token(token=refresh_token, token_type="refresh")
+
+    username = functions.verify_token(
+        token=refresh_token,
+        token_type="refresh"
+    )
+
     if not username:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
-    access_token = functions.create_token(username=username, token_type="access")
+    access_token = functions.create_token(
+        username=username,
+        token_type="access"
+    )
+
     return {"access_token": access_token}

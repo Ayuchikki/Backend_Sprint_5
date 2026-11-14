@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
+from sqlalchemy.orm import Session
 
 DATABASE_URL = "sqlite:///warehouse.db"
 

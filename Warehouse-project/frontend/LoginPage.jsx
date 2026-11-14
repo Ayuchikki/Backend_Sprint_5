@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import API_URL from '../api'
+import API_URL from './api'
 
 function LoginPage() {
 
@@ -7,23 +7,34 @@ function LoginPage() {
     const [password, setPassword] = useState("")
 
     async function login(e) {
+
         e.preventDefault()
 
-        const res = await fetch(`${API_URL}/login?username=${username}&password=${password}`, {
-            method: "POST"
+        const res = await fetch(`${API_URL}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
         })
 
         const data = await res.json()
 
         if (res.ok) {
+
             localStorage.setItem("access_token", data.access_token)
             localStorage.setItem("refresh_token", data.refresh_token)
+            localStorage.setItem("role", data.role)
 
             alert("Login successful")
+
             window.location.href = "/"
         }
         else {
-            alert("Invalid username or password")
+            alert(data.detail || "Invalid credentials")
         }
     }
 
@@ -32,6 +43,8 @@ function LoginPage() {
             <h2>Login</h2>
 
             <form onSubmit={login}>
+
+                <label>Username</label>
                 <input
                     placeholder="Username"
                     value={username}
@@ -39,6 +52,7 @@ function LoginPage() {
                     required
                 />
 
+                <label>Password</label>
                 <input
                     type="password"
                     placeholder="Password"
@@ -47,7 +61,10 @@ function LoginPage() {
                     required
                 />
 
-                <button type="submit">Login</button>
+                <button type="submit">
+                    Login
+                </button>
+
             </form>
         </div>
     )

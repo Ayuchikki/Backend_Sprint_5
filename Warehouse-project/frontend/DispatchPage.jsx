@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import API_URL from '../api'
+import API_URL from './api'
 
 function DispatchPage() {
 
@@ -19,7 +19,12 @@ function DispatchPage() {
 
         const data = await res.json()
 
-        setDispatches(data)
+        if (res.ok) {
+            setDispatches(data)
+        }
+        else {
+            alert(data.detail || "Unable to load dispatches")
+        }
     }
 
     useEffect(() => {
@@ -45,6 +50,8 @@ function DispatchPage() {
             })
         })
 
+        const data = await res.json()
+
         if (res.ok) {
 
             alert("Dispatch created successfully")
@@ -57,15 +64,17 @@ function DispatchPage() {
 
         }
         else {
-            alert("Unable to create dispatch")
+            alert(data.detail || "Unable to create dispatch")
         }
     }
 
     return (
         <div>
+
             <h2>Create Dispatch</h2>
 
             <form onSubmit={createDispatch}>
+
                 <input
                     placeholder="Destination"
                     value={destination}
@@ -90,19 +99,29 @@ function DispatchPage() {
                 <button type="submit">
                     Create Dispatch
                 </button>
+
             </form>
 
             <h2>All Dispatches</h2>
 
             {dispatches.map((item) => (
+
                 <div className="dispatch-card" key={item.id}>
+
                     <h3>Dispatch #{item.id}</h3>
+
                     <p>Destination: {item.destination}</p>
+
                     <p>Vehicle: {item.vehicle}</p>
+
                     <p>Status: {item.dispatch_status}</p>
+
                     <p>Date: {item.dispatch_date}</p>
+
                 </div>
+
             ))}
+
         </div>
     )
 }

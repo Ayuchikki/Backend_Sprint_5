@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import API_URL from '../api'
+import API_URL from './api'
 
 function PackageDetailPage() {
 
     const { id } = useParams()
+
     const [item, setItem] = useState(null)
 
     useEffect(() => {
+
         async function loadPackage() {
 
             const res = await fetch(`${API_URL}/packages/${id}`, {
@@ -17,10 +19,17 @@ function PackageDetailPage() {
             })
 
             const data = await res.json()
-            setItem(data)
+
+            if (res.ok) {
+                setItem(data)
+            }
+            else {
+                alert(data.detail || "Unable to load package")
+            }
         }
 
         loadPackage()
+
     }, [id])
 
     async function updatePackage(e) {
@@ -45,7 +54,8 @@ function PackageDetailPage() {
             alert("Package updated successfully")
         }
         else {
-            alert("Unable to update package")
+            const data = await res.json()
+            alert(data.detail || "Unable to update package")
         }
     }
 
@@ -55,9 +65,11 @@ function PackageDetailPage() {
 
     return (
         <div>
+
             <h2>Package Details</h2>
 
             <form onSubmit={updatePackage}>
+
                 <label>Package Name</label>
 
                 <input
@@ -66,6 +78,7 @@ function PackageDetailPage() {
                         ...item,
                         package_name: e.target.value
                     })}
+                    required
                 />
 
                 <label>Destination</label>
@@ -76,17 +89,21 @@ function PackageDetailPage() {
                         ...item,
                         destination: e.target.value
                     })}
+                    required
                 />
 
                 <label>Weight</label>
 
                 <input
                     type="number"
+                    step="any"
+                    min="0.01"
                     value={item.weight}
                     onChange={(e) => setItem({
                         ...item,
                         weight: e.target.value
                     })}
+                    required
                 />
 
                 <label>Status</label>
@@ -106,7 +123,9 @@ function PackageDetailPage() {
                 <button type="submit">
                     Update Package
                 </button>
+
             </form>
+
         </div>
     )
 }

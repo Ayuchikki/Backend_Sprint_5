@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import API_URL from '../api'
+import API_URL from './api'
 
 function PackageListPage() {
 
@@ -16,7 +16,13 @@ function PackageListPage() {
         })
 
         const data = await res.json()
-        setPackages(data)
+
+        if (res.ok) {
+            setPackages(data)
+        }
+        else {
+            alert(data.detail || "Unable to load packages")
+        }
     }
 
     useEffect(() => {
@@ -30,17 +36,28 @@ function PackageListPage() {
             return
         }
 
-        const res = await fetch(`${API_URL}/search/${search}`, {
+        const res = await fetch(`${API_URL}/search/${encodeURIComponent(search)}`, {
             headers: {
                 "token": localStorage.getItem("access_token")
             }
         })
 
         const data = await res.json()
-        setPackages(data)
+
+        if (res.ok) {
+            setPackages(data)
+        }
+        else {
+            alert(data.detail || "Search failed")
+        }
     }
 
     async function deletePackage(id) {
+
+        if (localStorage.getItem("role") !== "admin") {
+            alert("Only admin can delete packages")
+            return
+        }
 
         const res = await fetch(`${API_URL}/packages/${id}`, {
             method: "DELETE",
@@ -50,15 +67,21 @@ function PackageListPage() {
         })
 
         if (res.ok) {
+            alert("Package deleted")
             loadPackages()
+        }
+        else {
+            alert("Unable to delete package")
         }
     }
 
     return (
         <div>
+
             <h2>All Packages</h2>
 
             <div>
+
                 <input
                     placeholder="Search package"
                     value={search}
@@ -72,14 +95,21 @@ function PackageListPage() {
                 <button onClick={loadPackages}>
                     Show All
                 </button>
+
             </div>
 
             <div className="packages">
+
                 {packages.map((item) => (
+
                     <div className="package-card" key={item.id}>
+
                         <h3>{item.package_name}</h3>
+
                         <p>Destination: {item.destination}</p>
+
                         <p>Weight: {item.weight}</p>
+
                         <p>Status: {item.status}</p>
 
                         <Link to={`/package/${item.id}`}>
@@ -88,12 +118,18 @@ function PackageListPage() {
 
                         <br />
 
-                        <button onClick={() => deletePackage(item.id)}>
-                            Delete
-                        </button>
+                        {localStorage.getItem("role") === "admin" && (
+                            <button onClick={() => deletePackage(item.id)}>
+                                Delete
+                            </button>
+                        )}
+
                     </div>
+
                 ))}
+
             </div>
+
         </div>
     )
 }

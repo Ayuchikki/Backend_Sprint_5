@@ -1,60 +1,79 @@
-import {useState} from 'react'
-import {useNavigate} from 'react-router-dom'
-import API_URL from '../api'
+import { useState } from 'react'
+import API_URL from './api'
+
 function AddPackagePage() {
-    const navigate = useNavigate()
-    const [name, setName] = useState("")
+
+    const [packageName, setPackageName] = useState("")
     const [destination, setDestination] = useState("")
     const [weight, setWeight] = useState("")
 
     async function addPackage(e) {
+
         e.preventDefault()
+
         const res = await fetch(`${API_URL}/packages`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "token": localStorage.getItem("access_token")
             },
             body: JSON.stringify({
-                package_name: name,
+                package_name: packageName,
                 destination: destination,
                 weight: Number(weight)
             })
         })
 
+        const data = await res.json()
+
         if (res.ok) {
+
             alert("Package added successfully")
-            navigate("/")
+
+            setPackageName("")
+            setDestination("")
+            setWeight("")
+
         }
         else {
-            alert("Unable to add package")
+            alert(data.detail || "Unable to add package")
         }
     }
+
     return (
         <div>
-            <h2>Add New Package</h2>
+            <h2>Add Package</h2>
+
             <form onSubmit={addPackage}>
+
+                <label>Package Name</label>
                 <input
-                    placeholder="Package Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={packageName}
+                    onChange={(e) => setPackageName(e.target.value)}
                     required
                 />
+
+                <label>Destination</label>
                 <input
-                    placeholder="Destination"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     required
                 />
+
+                <label>Weight</label>
                 <input
                     type="number"
-                    placeholder="Weight"
+                    step="any"
+                    min="0.01"
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     required
                 />
+
                 <button type="submit">
                     Add Package
                 </button>
+
             </form>
         </div>
     )

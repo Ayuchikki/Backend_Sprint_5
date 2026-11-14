@@ -1,4 +1,4 @@
-]from database import engine, packages, dispatches, users
+from database import engine, packages, dispatches, users
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
@@ -12,7 +12,10 @@ SECRET_KEY = "SECRET123"
 ALGORITHM = "HS256"
 
 
+# PASSWORD HASHING
+
 def hash_password(password):
+
     hashed = bcrypt.hashpw(
         password.encode("utf-8"),
         bcrypt.gensalt()
@@ -22,13 +25,17 @@ def hash_password(password):
 
 
 def verify_password(password, hashed_password):
+
     return bcrypt.checkpw(
         password.encode("utf-8"),
         hashed_password.encode("utf-8")
     )
 
 
+# CREATE DEFAULT ADMIN
+
 def create_default_admin():
+
     session = Session(engine)
 
     result = session.execute(
@@ -38,6 +45,7 @@ def create_default_admin():
     user = result.fetchone()
 
     if not user:
+
         session.execute(
             insert(users).values(
                 username="Ayushman",
@@ -51,7 +59,10 @@ def create_default_admin():
     session.close()
 
 
+# ADD USER
+
 def add_user(data):
+
     session = Session(engine)
 
     result = session.execute(
@@ -59,6 +70,7 @@ def add_user(data):
     )
 
     if result.fetchone():
+
         session.close()
         return False
 
@@ -75,6 +87,8 @@ def add_user(data):
 
     return True
 
+
+# LOGIN
 
 def verify_login(username, password):
 
@@ -111,6 +125,8 @@ def verify_login(username, password):
     return False
 
 
+# JWT TOKEN
+
 def create_token(username, role, token_type):
 
     time = ACCESS_TOKEN_EXP
@@ -137,6 +153,7 @@ def create_token(username, role, token_type):
 def verify_token(token, token_type):
 
     try:
+
         payload = jwt.decode(
             jwt=token,
             key=SECRET_KEY,
@@ -144,21 +161,26 @@ def verify_token(token, token_type):
         )
 
     except jwt.InvalidTokenError:
+
         return False
 
-    if payload.get("token_type") == token_type:
+    if payload["token_type"] == token_type:
         return payload
 
     return False
 
 
+# ROLE CHECKING
+
 def check_role(user, role):
 
-    if user["role"] != role:
-        return False
+    if user["role"] == role:
+        return True
 
-    return True
+    return False
 
+
+# ADD PACKAGE
 
 def add_package(data):
 
@@ -183,6 +205,8 @@ def add_package(data):
     return package_id
 
 
+# GET ALL PACKAGES
+
 def get_packages():
 
     session = Session(engine)
@@ -195,6 +219,8 @@ def get_packages():
 
     return data
 
+
+# GET ONE PACKAGE
 
 def get_package(package_id):
 
@@ -214,6 +240,8 @@ def get_package(package_id):
     return None
 
 
+# UPDATE PACKAGE
+
 def update_package(package_id, data):
 
     session = Session(engine)
@@ -232,6 +260,8 @@ def update_package(package_id, data):
     return count
 
 
+# DELETE PACKAGE
+
 def delete_package(package_id):
 
     session = Session(engine)
@@ -247,6 +277,8 @@ def delete_package(package_id):
 
     return count
 
+
+# SEARCH PACKAGES
 
 def search_packages(name):
 
@@ -264,6 +296,8 @@ def search_packages(name):
 
     return data
 
+
+# ADD DISPATCH
 
 def add_dispatch(data):
 
@@ -296,6 +330,8 @@ def add_dispatch(data):
 
     return dispatch_id
 
+
+# GET ALL DISPATCHES
 
 def get_dispatches():
 
